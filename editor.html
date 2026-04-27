@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Name - Editor</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body class="editor-body">
+
+  <!-- TOP BAR -->
+  <header class="editor-topbar">
+    <div class="nav-logo"><a href="index.html">[LOGO] Name</a></div>
+    <span class="project-title-input">Project title input field</span>
+    <div class="topbar-actions">
+      <button class="btn-secondary">Save</button>
+      <button class="btn-primary">Download/Export</button>
+      <a href="help.html" class="btn-secondary">Help</a>
+    </div>
+  </header>
+
+  <div class="editor-layout">
+
+    <!-- LEFT TOOLBAR -->
+    <aside class="left-toolbar">
+      <h3>Tools</h3>
+      <p class="panel-note">Left toolbar — tool buttons</p>
+      <ul class="tool-list">
+        <li><button class="tool-btn">Add Text</button></li>
+        <li><button class="tool-btn">Upload Image</button></li>
+        <li><button class="tool-btn">Background</button></li>
+        <li><button class="tool-btn">Templates</button></li>
+        <li><button class="tool-btn">Elements</button></li>
+      </ul>
+    </aside>
+
+    <!-- MAIN CANVAS (LIVE PREVIEW) -->
+    <main class="canvas-area">
+      <p class="canvas-label">Main canvas area — live preview</p>
+      <div class="design-canvas">
+        <p class="canvas-placeholder">Design canvas</p>
+        <p class="canvas-placeholder">"Your text appears here"</p>
+        <p class="canvas-placeholder">[Uploaded image here]</p>
+      </div>
+    </main>
+
+    <!-- RIGHT EDIT PANEL -->
+    <aside class="right-panel">
+      <h3>Controls</h3>
+      <p class="panel-note">Right edit panel — style controls</p>
+
+      <section class="control-group">
+        <h4>Text Settings</h4>
+        <label>Font: <select><option>Font dropdown</option></select></label>
+        <label>Size: <input type="range" min="8" max="96"/></label>
+        <label>Color: <input type="color"/></label>
+        <label>Shadow: <input type="checkbox"/>On/Off</label>
+        <label>Align:
+          <button class="btn-small">L</button>
+          <button class="btn-small">C</button>
+          <button class="btn-small">R</button>
+        </label>
+      </section>
+
+      <section class="control-group">
+        <h4>Background</h4>
+        <label>Color: <input type="color"/></label>
+        <label>Image: <input type="file" accept="image/*"/></label>
+      </section>
+
+      <section class="control-group">
+        <h4>Image Settings</h4>
+        <label>Resize: <input type="range" min="10" max="200"/></label>
+        <p>Position: drag on canvas</p>
+      </section>
+    </aside>
+
+  </div>
+</body>
+</html>

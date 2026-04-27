@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Name - Home</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- NAV BAR -->
+  <header class="navbar">
+    <div class="nav-logo">[LOGO] Name</div>
+    <nav class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="editor.html">Editor</a>
+      <a href="help.html">Help</a>
+    </nav>
+    <div class="nav-auth">
+      <button class="btn-secondary">Log In</button>
+      <button class="btn-primary">Sign Up</button>
+    </div>
+  </header>
+
+  <main class="landing-main">
+
+
+    <!-- BIG SECTION -->
+    <section class="hero">
+      <h1>Big title goes here</h1>
+      <p>Big subtext - brief description of what it does</p>
+      <a href="editor.html" class="btn-primary btn-large">Start Designing</a>
+    </section>
+
+    <!-- SAVED PROJECTS SECTION -->
+    <section class="projects-section">
+      <h2>Saved Projects</h2>
+      <p class="section-note">Projects section — displays user's previously saved designs</p>
+
+      <div class="projects-grid">
+        <!-- New Project Card -->
+        <a href="editor.html" class="project-card new-project">
+          <span class="plus-icon">+</span>
+          <p>New Project</p>
+        </a>
+
+        <!-- Placeholder saved project cards -->
+        <div class="project-card saved-project">
+          <div class="project-thumbnail">Project thumbnail preview</div>
+          <p class="project-name">Project 1</p>
+          <div class="project-actions">
+            <button class="btn-small">Open</button>
+            <button class="btn-small btn-danger">Delete</button>
+          </div>
+        </div>
+
+        <div class="project-card saved-project">
+          <div class="project-thumbnail">Project thumbnail preview</div>
+          <p class="project-name">Project 2</p>
+          <div class="project-actions">
+            <button class="btn-small">Open</button>
+            <button class="btn-small btn-danger">Delete</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>Footer</p>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="editor.html">Editor</a>
+      <a href="help.html">Help/README</a>
+    </nav>
+  </footer>
+</body>
+</html>
