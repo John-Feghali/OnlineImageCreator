@@ -52,8 +52,11 @@ a {
 }
 
 .btn-large {
-  padding: 12px 28px;
+  display: inline-block;
+  padding: 14px 34px;
   font-size: 1rem;
+  font-weight: 700;
+  margin-top: 10px;
 }
 
 .navbar {
@@ -135,10 +138,11 @@ a {
 
 .hero {
   text-align: center;
-  padding: 72px 24px;
-  border: 2px dashed gray;
-  border-radius: 8px;
+  padding: 90px 32px;
+  border: 2px solid black;
+  border-radius: 12px;
   margin-bottom: 48px;
+  background: white;
 }
 
 .hero h1 {
@@ -149,6 +153,13 @@ a {
 .hero p {
   margin-bottom: 28px;
   color: darkslategray;
+}
+
+.hero-helper {
+  margin-top: 16px;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  color: gray;
 }
 
 .projects-section,
@@ -177,23 +188,26 @@ a {
 
 .project-card {
   border: 2px solid black;
-  border-radius: 6px;
-  padding: 16px;
-  width: 180px;
+  border-radius: 10px;
+  padding: 18px;
+  width: 190px;
   text-align: center;
+  background: white;
+  transition: 0.2s ease;
 }
 
 .new-project {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 160px;
-  cursor: pointer;
+  border: 2px dashed black;
+  background: white;
 }
 
 .new-project:hover {
   background: whitesmoke;
+  t4ransform: translateY(-3px);
+}
+
+.project-card {
+  transition: 0.2s ease;
 }
 
 .plus-icon {
