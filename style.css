@@ -370,17 +370,21 @@ a {
   height: 400px;
   border: 2px dashed black;
   background: white;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
+  position: relative;
+  overflow: hidden;
   border-radius: 4px;
 }
 
 .canvas-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   color: lightgray;
   font-style: italic;
+  text-align: center;
+  pointer-events: none;
+  width: 80%;
 }
 
 .right-panel {
@@ -476,4 +480,35 @@ a {
   display: flex;
   gap: 16px;
   margin-top: 32px;
+}
+
+/* React root — fills editor-body and creates its own flex column for the app */
+.editor-body #root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Editable project title in the top bar */
+.project-title-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed lightgray;
+  color: ghostwhite;
+  text-align: center;
+  font-size: 0.9rem;
+  padding: 2px 8px;
+  font-style: italic;
+}
+
+.project-title-field::placeholder {
+  color: darkgray;
+}
+
+.project-title-field:focus {
+  outline: none;
+  border-bottom-color: white;
 }

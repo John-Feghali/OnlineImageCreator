@@ -3,78 +3,420 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Name - Editor</title>
+  <title>StudioKit - Editor</title>
   <link rel="stylesheet" href="style.css"/>
+  <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
 </head>
 <body class="editor-body">
 
-  <!-- TOP BAR -->
-  <header class="editor-topbar">
-    <div class="nav-logo"><a href="index.html">[LOGO] Name</a></div>
-    <span class="project-title-input">Project title input field</span>
-    <div class="topbar-actions">
-      <button class="btn-secondary">Save</button>
-      <button class="btn-primary">Download/Export</button>
-      <a href="help.html" class="btn-secondary">Help</a>
-    </div>
-  </header>
+  <div id="root"></div>
 
-  <div class="editor-layout">
+  <script type="text/babel">
+    const { useState } = React;
 
-    <!-- LEFT TOOLBAR -->
-    <aside class="left-toolbar">
-      <h3>Tools</h3>
-      <p class="panel-note">Left toolbar — tool buttons</p>
-      <ul class="tool-list">
-        <li><button class="tool-btn">Add Text</button></li>
-        <li><button class="tool-btn">Upload Image</button></li>
-        <li><button class="tool-btn">Background</button></li>
-        <li><button class="tool-btn">Templates</button></li>
-        <li><button class="tool-btn">Elements</button></li>
-      </ul>
-    </aside>
+    /* ── Text element rendered on the canvas ── */
+    function TextElement({ el, isSelected, isDragging, onMouseDown }) {
+      const style = {
+        position: 'absolute',
+        left: el.x + 'px',
+        top: el.y + 'px',
+        fontFamily: el.fontFamily,
+        fontSize: el.fontSize + 'px',
+        color: el.color,
+        textAlign: el.textAlign,
+        textShadow: el.shadow ? '2px 2px 4px rgba(0,0,0,0.5)' : 'none',
+        cursor: isDragging ? 'grabbing' : 'grab',
+        userSelect: 'none',
+        outline: isSelected ? '2px dashed #0066cc' : '2px dashed transparent',
+        padding: '4px',
+        whiteSpace: 'pre',
+        lineHeight: '1.2',
+      };
+      return (
+        <div style={style} onMouseDown={(e) => onMouseDown(e, el.id)} onClick={(e) => e.stopPropagation()}>
+          {el.content}
+        </div>
+      );
+    }
 
-    <!-- MAIN CANVAS (LIVE PREVIEW) -->
-    <main class="canvas-area">
-      <p class="canvas-label">Main canvas area — live preview</p>
-      <div class="design-canvas">
-        <p class="canvas-placeholder">Design canvas</p>
-        <p class="canvas-placeholder">"Your text appears here"</p>
-        <p class="canvas-placeholder">[Uploaded image here]</p>
-      </div>
-    </main>
+    /* ── Image element rendered on the canvas ── */
+    function ImageElement({ el, isSelected, isDragging, onMouseDown }) {
+      const style = {
+        position: 'absolute',
+        left: el.x + 'px',
+        top: el.y + 'px',
+        width: el.width + 'px',
+        cursor: isDragging ? 'grabbing' : 'grab',
+        outline: isSelected ? '2px dashed #0066cc' : '2px dashed transparent',
+        userSelect: 'none',
+        display: 'block',
+      };
+      return (
+        <img
+          src={el.src}
+          alt="canvas element"
+          style={style}
+          onMouseDown={(e) => onMouseDown(e, el.id)}
+          onClick={(e) => e.stopPropagation()}
+          draggable={false}/>
+      );
+    }
 
-    <!-- RIGHT EDIT PANEL -->
-    <aside class="right-panel">
-      <h3>Controls</h3>
-      <p class="panel-note">Right edit panel — style controls</p>
+    /* ── Live design canvas ── */
+    function DesignCanvas({ elements, selectedId, bgColor, bgImage, dragging, onMouseDown }) {
+      const canvasStyle = {
+        backgroundColor: bgColor,
+        backgroundImage: bgImage ? 'url(' + bgImage + ')' : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      };
+      return (
+        <div className="design-canvas" style={canvasStyle}>
+          {elements.length === 0 &&
+            <p className="canvas-placeholder">
+              Add text or images using the tools on the left.
+            </p>
+          }
+          {elements.map(el =>
+            el.type === 'text' ?
+              <TextElement
+                key={el.id}
+                el={el}
+                isSelected={el.id === selectedId}
+                isDragging={dragging !== null && dragging.id === el.id}
+                onMouseDown={onMouseDown}/>
+            :
+              <ImageElement
+                key={el.id}
+                el={el}
+                isSelected={el.id === selectedId}
+                isDragging={dragging !== null && dragging.id === el.id}
+                onMouseDown={onMouseDown}/>
+          )}
+        </div>
+      );
+    }
 
-      <section class="control-group">
-        <h4>Text Settings</h4>
-        <label>Font: <select><option>Font dropdown</option></select></label>
-        <label>Size: <input type="range" min="8" max="96"/></label>
-        <label>Color: <input type="color"/></label>
-        <label>Shadow: <input type="checkbox"/>On/Off</label>
-        <label>Align:
-          <button class="btn-small">L</button>
-          <button class="btn-small">C</button>
-          <button class="btn-small">R</button>
-        </label>
-      </section>
+    /* ── Left toolbar ── */
+    function LeftToolbar({ onAddText, onImageUpload }) {
+      return (
+        <aside className="left-toolbar">
+          <h3>Tools</h3>
+          <ul className="tool-list">
+            <li>
+              <label className="tool-btn" onClick={onAddText} style={{display:'block', cursor:'pointer', marginBottom:'0'}}>
+                + Add Text
+              </label>
+            </li>
+            <li>
+              <label className="tool-btn" style={{display:'block', cursor:'pointer', marginBottom:'0'}}>
+                Upload Image
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={onImageUpload}
+                  style={{display:'none'}}/>
+              </label>
+            </li>
+          </ul>
+        </aside>
+      );
+    }
 
-      <section class="control-group">
-        <h4>Background</h4>
-        <label>Color: <input type="color"/></label>
-        <label>Image: <input type="file" accept="image/*"/></label>
-      </section>
+    /* ── Right feature panel ── */
+    function RightPanel({
+      selectedEl, bgColor, bgImage,
+      onBgColorChange, onBgImageUpload, onBgImageClear,
+      onUpdateElement, onDeleteSelected
+    }) {
+      return (
+        <aside className="right-panel">
+          <h3>Controls</h3>
 
-      <section class="control-group">
-        <h4>Image Settings</h4>
-        <label>Resize: <input type="range" min="10" max="200"/></label>
-        <p>Position: drag on canvas</p>
-      </section>
-    </aside>
+          {!selectedEl &&
+            <p className="panel-note" style={{marginBottom:'12px'}}>
+              Click an element on the canvas to select and edit it.
+            </p>
+          }
 
-  </div>
+          {selectedEl && selectedEl.type === 'text' &&
+            <section className="control-group">
+              <h4>Text Settings</h4>
+
+              <label>
+                Content:
+                <input
+                  type="text"
+                  value={selectedEl.content}
+                  onChange={(e) => onUpdateElement(selectedEl.id, 'content', e.target.value)}
+                  style={{width:'100%', padding:'3px', marginTop:'2px'}}/>
+              </label>
+
+              <label>
+                Font:
+                <select
+                  value={selectedEl.fontFamily}
+                  onChange={(e) => onUpdateElement(selectedEl.id, 'fontFamily', e.target.value)}>
+                  <option value="Arial">Arial</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="'Times New Roman'">Times New Roman</option>
+                  <option value="'Courier New'">Courier New</option>
+                  <option value="Verdana">Verdana</option>
+                  <option value="Impact">Impact</option>
+                </select>
+              </label>
+
+              <label>
+                Size: {selectedEl.fontSize}px
+                <input
+                  type="range"
+                  min="8"
+                  max="96"
+                  value={selectedEl.fontSize}
+                  onChange={(e) => onUpdateElement(selectedEl.id, 'fontSize', parseInt(e.target.value))}/>
+              </label>
+
+              <label>
+                Color:
+                <input
+                  type="color"
+                  value={selectedEl.color}
+                  onChange={(e) => onUpdateElement(selectedEl.id, 'color', e.target.value)}/>
+              </label>
+
+              <label style={{flexDirection:'row', alignItems:'center', gap:'8px'}}>
+                Shadow:
+                <input
+                  type="checkbox"
+                  checked={selectedEl.shadow}
+                  onChange={(e) => onUpdateElement(selectedEl.id, 'shadow', e.target.checked)}
+                  style={{width:'auto', marginLeft:'6px'}}/>
+              </label>
+
+              <label>Align:</label>
+              <div style={{display:'flex', gap:'4px', marginBottom:'8px'}}>
+                <button
+                  className="btn-small"
+                  style={{fontWeight: selectedEl.textAlign === 'left' ? 'bold' : 'normal'}}
+                  onClick={() => onUpdateElement(selectedEl.id, 'textAlign', 'left')}>
+                  L
+                </button>
+                <button
+                  className="btn-small"
+                  style={{fontWeight: selectedEl.textAlign === 'center' ? 'bold' : 'normal'}}
+                  onClick={() => onUpdateElement(selectedEl.id, 'textAlign', 'center')}>
+                  C
+                </button>
+                <button
+                  className="btn-small"
+                  style={{fontWeight: selectedEl.textAlign === 'right' ? 'bold' : 'normal'}}
+                  onClick={() => onUpdateElement(selectedEl.id, 'textAlign', 'right')}>
+                  R
+                </button>
+              </div>
+
+              <button
+                className="btn-small btn-danger"
+                onClick={onDeleteSelected}
+                style={{width:'100%', padding:'5px'}}
+              >Delete Element</button>
+            </section>
+          }
+
+          {selectedEl && selectedEl.type === 'image' &&
+            <section className="control-group">
+              <h4>Image Settings</h4>
+
+              <label>
+                Width: {selectedEl.width}px
+                <input
+                  type="range"
+                  min="20"
+                  max="590"
+                  value={selectedEl.width}
+                  onChange={(e) => onUpdateElement(selectedEl.id, 'width', parseInt(e.target.value))}/>
+              </label>
+
+              <p style={{fontSize:'0.8rem', color:'dimgray', marginBottom:'8px'}}>
+                Position: drag on canvas
+              </p>
+
+              <button
+                className="btn-small btn-danger"
+                onClick={onDeleteSelected}
+                style={{width:'100%', padding:'5px'}}
+              >Delete Element</button>
+            </section>
+          }
+
+          <section className="control-group">
+            <h4>Background</h4>
+
+            <label>
+              Color:
+              <input type="color" value={bgColor} onChange={onBgColorChange} />
+            </label>
+
+            <label>
+              Image:
+              <input type="file" accept="image/*" onChange={onBgImageUpload} />
+            </label>
+
+            {bgImage &&
+              <button
+                className="btn-small"
+                onClick={onBgImageClear}
+                style={{marginTop:'6px', width:'100%'}}
+              >Clear Background Image</button>
+            }
+          </section>
+        </aside>
+      );
+    }
+
+    function EditorApp() {
+      const [elements, setElements] = useState([]);
+      const [selectedId, setSelectedId] = useState(null);
+      const [bgColor, setBgColor] = useState('#ffffff');
+      const [bgImage, setBgImage] = useState('');
+      const [projectTitle, setProjectTitle] = useState('Untitled Project');
+      const [dragging, setDragging] = useState(null);
+
+      function addText() {
+        const newEl = {
+          id: Date.now(),
+          type: 'text',
+          content: 'New Text',
+          x: 220,
+          y: 160,
+          fontFamily: 'Arial',
+          fontSize: 24,
+          color: '#000000',
+          shadow: false,
+          textAlign: 'left',
+        };
+        setElements(prev => [...prev, newEl]);
+        setSelectedId(newEl.id);
+      }
+
+      function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const newEl = {
+            id: Date.now(),
+            type: 'image',
+            src: e.target.result,
+            x: 50,
+            y: 50,
+            width: 200,
+          };
+          setElements(prev => [...prev, newEl]);
+          setSelectedId(newEl.id);
+        };
+        reader.readAsDataURL(file);
+        event.target.value = '';
+      }
+
+      function handleBgImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => setBgImage(e.target.result);
+        reader.readAsDataURL(file);
+        event.target.value = '';
+      }
+
+      function updateElement(id, prop, value) {
+        setElements(prev => prev.map(el =>
+          el.id === id ? Object.assign({}, el, { [prop]: value }) : el
+        ));
+      }
+
+      function deleteSelected() {
+        setElements(prev => prev.filter(el => el.id !== selectedId));
+        setSelectedId(null);
+      }
+
+      function handleMouseDown(event, id) {
+        event.stopPropagation();
+        setSelectedId(id);
+        setDragging({ id, startX: event.clientX, startY: event.clientY });
+      }
+
+      function handleMouseMove(event) {
+        if (!dragging) return;
+        const dx = event.clientX - dragging.startX;
+        const dy = event.clientY - dragging.startY;
+        setElements(prev => prev.map(el => {
+          if (el.id !== dragging.id) return el;
+          return Object.assign({}, el, { x: el.x + dx, y: el.y + dy });
+        }));
+        setDragging(Object.assign({}, dragging, { startX: event.clientX, startY: event.clientY }));
+      }
+
+      function handleMouseUp() {
+        setDragging(null);
+      }
+
+      function handleCanvasClick() {
+        setSelectedId(null);
+      }
+
+      const selectedEl = elements.find(el => el.id === selectedId) || null;
+
+      return (
+        <React.Fragment>
+          <header className="editor-topbar">
+            <div className="nav-logo"><a href="index.html">StudioKit</a></div>
+            <input
+              className="project-title-field"
+              value={projectTitle}
+              onChange={(e) => setProjectTitle(e.target.value)}
+              placeholder="Project title..."/>
+            <div className="topbar-actions">
+              <button className="btn-secondary">Save</button>
+              <a href="help.html" className="btn-secondary">Help</a>
+            </div>
+          </header>
+
+          <div
+            className="editor-layout"
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}>
+            <LeftToolbar onAddText={addText} onImageUpload={handleImageUpload} />
+
+            <main className="canvas-area" onClick={handleCanvasClick}>
+              <p className="canvas-label">Live Preview — 600 × 400</p>
+              <DesignCanvas
+                elements={elements}
+                selectedId={selectedId}
+                bgColor={bgColor}
+                bgImage={bgImage}
+                dragging={dragging}
+                onMouseDown={handleMouseDown}/>
+            </main>
+
+            <RightPanel
+              selectedEl={selectedEl}
+              bgColor={bgColor}
+              bgImage={bgImage}
+              onBgColorChange={(e) => setBgColor(e.target.value)}
+              onBgImageUpload={handleBgImageUpload}
+              onBgImageClear={() => setBgImage('')}
+              onUpdateElement={updateElement}
+              onDeleteSelected={deleteSelected}/>
+          </div>
+        </React.Fragment>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<EditorApp />);
+  </script>
+
 </body>
 </html>
