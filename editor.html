@@ -132,9 +132,41 @@
               </label>
             </li>
           </ul>
-        </aside>
-      );
-    }
+
+                </ul>
+
+      <section className="image-search-panel">
+        <h4>Pexels Images</h4>
+
+        <input
+          className="image-search-input"
+          type="text"
+          value={imageSearch}
+          onChange={(e) => setImageSearch(e.target.value)}
+          placeholder="Search images..."
+        />
+
+        <button className="tool-btn" onClick={onServerImageSearch}>
+          Search Images
+        </button>
+
+        {imageStatus && <p className="panel-note">{imageStatus}</p>}
+
+        <div className="server-image-grid">
+          {serverImages.map(image => (
+            <img
+              key={image.id}
+              src={image.thumbnail}
+              alt={image.alt}
+              title="Click to add image"
+              onClick={() => onAddServerImage(image.fullImage)}
+            />
+          ))}
+        </div>
+      </section>
+    </aside>
+   );
+  }
 
     /* ── Right feature panel ── */
     function RightPanel({
