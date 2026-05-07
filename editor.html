@@ -378,6 +378,34 @@
         event.target.value = '';
       }
 
+      async function handleServerImageSearch() {
+  try {
+    setImageStatus("Loading images...");
+
+    const images = await searchPexelsImages(imageSearch);
+
+    setServerImages(images);
+    setImageStatus("");
+  } catch (error) {
+    console.error(error);
+    setImageStatus("Could not load images. Check the API key.");
+  }
+}
+
+function addServerImageToCanvas(imageUrl) {
+  const newEl = {
+    id: Date.now(),
+    type: "image",
+    src: imageUrl,
+    x: 50,
+    y: 50,
+    width: 220
+  };
+
+  setElements(prev => [...prev, newEl]);
+  setSelectedId(newEl.id);
+}
+
       function updateElement(id, prop, value) {
         setElements(prev => prev.map(el =>
           el.id === id ? Object.assign({}, el, { [prop]: value }) : el
@@ -435,7 +463,16 @@
             className="editor-layout"
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}>
-            <LeftToolbar onAddText={addText} onImageUpload={handleImageUpload} />
+            <LeftToolbar 
+              onAddText={addText} 
+              onImageUpload={handleImageUpload} 
+              imageSearch={imageSearch}
+              setImageSearch={setImageSearch}
+              onServerImageSearch={handleServerImageSearch}
+              serverImages={serverImages}
+              imageStatus={imageStatus}
+              onAddServerImage={addServerImageToCanvas}
+              />
 
             <main className="canvas-area" onClick={handleCanvasClick}>
               <p className="canvas-label">Live Preview — 600 × 400</p>
