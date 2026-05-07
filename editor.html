@@ -326,6 +326,11 @@
       const [bgImage, setBgImage] = useState('');
       const [projectTitle, setProjectTitle] = useState('Untitled Project');
       const [dragging, setDragging] = useState(null);
+      
+      const [imageSearch, setImageSearch] = useState("nature");
+      const [serverImages, setServerImages] = useState([]);
+      const [imageStatus, setImageStatus] = useState("");
+      
 
       function addText() {
         const newEl = {
