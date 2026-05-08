@@ -404,6 +404,26 @@ function addServerImageToCanvas(imageUrl) {
   setSelectedId(newEl.id);
 }
 
+      function saveProject() {
+  const project = {
+    id: Date.now(),
+    title: projectTitle || "Untitled Project",
+    elements: elements,
+    bgColor: bgColor,
+    bgImage: bgImage,
+    savedAt: new Date().toLocaleString()
+  };
+
+  const savedProjects =
+    JSON.parse(localStorage.getItem("studioKitProjects")) || [];
+
+  savedProjects.push(project);
+
+  localStorage.setItem("studioKitProjects", JSON.stringify(savedProjects));
+
+  alert("Project saved successfully!");
+}
+
       function updateElement(id, prop, value) {
         setElements(prev => prev.map(el =>
           el.id === id ? Object.assign({}, el, { [prop]: value }) : el
@@ -452,7 +472,7 @@ function addServerImageToCanvas(imageUrl) {
               onChange={(e) => setProjectTitle(e.target.value)}
               placeholder="Project title..."/>
             <div className="topbar-actions">
-              <button className="btn-secondary">Save</button>
+              <button className="btn-secondary" onClick={saveProject}>Save</button>
               <a href="help.html" className="btn-secondary">Help</a>
             </div>
           </header>
