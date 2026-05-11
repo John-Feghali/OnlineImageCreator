@@ -8,6 +8,8 @@
   <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="editor-body">
 
@@ -16,7 +18,7 @@
   <script src="images.js"></script>
   
   <script type="text/babel">
-    const { useState } = React;
+    const { useState, useEffect } = React;
 
     /* ── Text element rendered on the canvas ── */
     function TextElement({ el, isSelected, isDragging, onMouseDown }) {
@@ -67,12 +69,14 @@
     }
 
     /* ── Live design canvas ── */
-    function DesignCanvas({ elements, selectedId, bgColor, bgImage, dragging, onMouseDown }) {
+    function DesignCanvas({ elements, selectedId, bgColor, bgImage, dragging, onMouseDown, canvasSize }) {
       const canvasStyle = {
         backgroundColor: bgColor,
         backgroundImage: bgImage ? 'url(' + bgImage + ')' : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        width: canvasSize.width + 'px',
+        height: canvasSize.height + 'px',
       };
       return (
         <div className="design-canvas" style={canvasStyle}>
@@ -352,16 +356,23 @@
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
-          const newEl = {
-            id: Date.now(),
-            type: 'image',
-            src: e.target.result,
-            x: 50,
-            y: 50,
-            width: 200,
+          const src = e.target.result;
+          const img = new Image();
+          img.onload = () => {
+            const newEl = {
+              id: Date.now(),
+              type: 'image',
+              src,
+              x: 50,
+              y: 50,
+              width: 200,
+              naturalWidth: img.naturalWidth,
+              naturalHeight: img.naturalHeight,
+            };
+            setElements(prev => [...prev, newEl]);
+            setSelectedId(newEl.id);
           };
-          setElements(prev => [...prev, newEl]);
-          setSelectedId(newEl.id);
+          img.src = src;
         };
         reader.readAsDataURL(file);
         event.target.value = '';
@@ -391,18 +402,76 @@
 }
 
 function addServerImageToCanvas(imageUrl) {
-  const newEl = {
-    id: Date.now(),
-    type: "image",
-    src: imageUrl,
-    x: 50,
-    y: 50,
-    width: 220
+  const img = new Image();
+  img.onload = () => {
+    const newEl = {
+      id: Date.now(),
+      type: "image",
+      src: imageUrl,
+      x: 50,
+      y: 50,
+      width: 220,
+      naturalWidth: img.naturalWidth,
+      naturalHeight: img.naturalHeight,
+    };
+    setElements(prev => [...prev, newEl]);
+    setSelectedId(newEl.id);
   };
-
-  setElements(prev => [...prev, newEl]);
-  setSelectedId(newEl.id);
+  img.src = imageUrl;
 }
+
+      async function captureCanvas() {
+        const canvasEl = document.querySelector('.design-canvas');
+        if (!canvasEl) return null;
+        const previousSelected = selectedId;
+        setSelectedId(null);
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const rendered = await html2canvas(canvasEl, {
+          backgroundColor: bgColor,
+          useCORS: true,
+          allowTaint: true,
+          scale: 2,
+        });
+        setSelectedId(previousSelected);
+        return rendered;
+      }
+
+      function sanitizeFilename(name) {
+        return (name || 'project').replace(/[^a-z0-9-_]+/gi, '_').slice(0, 60) || 'project';
+      }
+
+      async function downloadAsImage() {
+        try {
+          const rendered = await captureCanvas();
+          if (!rendered) return;
+          const link = document.createElement('a');
+          link.download = sanitizeFilename(projectTitle) + '.png';
+          link.href = rendered.toDataURL('image/png');
+          link.click();
+        } catch (err) {
+          console.error(err);
+          alert('Could not export image. External images may be blocked by CORS.');
+        }
+      }
+
+      async function downloadAsPdf() {
+        try {
+          const rendered = await captureCanvas();
+          if (!rendered) return;
+          const imgData = rendered.toDataURL('image/png');
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({
+            orientation: rendered.width >= rendered.height ? 'landscape' : 'portrait',
+            unit: 'px',
+            format: [rendered.width, rendered.height],
+          });
+          pdf.addImage(imgData, 'PNG', 0, 0, rendered.width, rendered.height);
+          pdf.save(sanitizeFilename(projectTitle) + '.pdf');
+        } catch (err) {
+          console.error(err);
+          alert('Could not export PDF. External images may be blocked by CORS.');
+        }
+      }
 
       function saveProject() {
   const project = {
@@ -445,10 +514,20 @@ function addServerImageToCanvas(imageUrl) {
         if (!dragging) return;
         const dx = event.clientX - dragging.startX;
         const dy = event.clientY - dragging.startY;
-        setElements(prev => prev.map(el => {
-          if (el.id !== dragging.id) return el;
-          return Object.assign({}, el, { x: el.x + dx, y: el.y + dy });
-        }));
+        setElements(prev => {
+          const draggedEl = prev.find(el => el.id === dragging.id);
+          if (!draggedEl) return prev;
+          const newX = draggedEl.x + dx;
+          const newY = draggedEl.y + dy;
+          const shiftX = newX < 0 ? -newX : 0;
+          const shiftY = newY < 0 ? -newY : 0;
+          return prev.map(el => {
+            if (el.id === dragging.id) {
+              return Object.assign({}, el, { x: newX + shiftX, y: newY + shiftY });
+            }
+            return Object.assign({}, el, { x: el.x + shiftX, y: el.y + shiftY });
+          });
+        });
         setDragging(Object.assign({}, dragging, { startX: event.clientX, startY: event.clientY }));
       }
 
@@ -462,6 +541,24 @@ function addServerImageToCanvas(imageUrl) {
 
       const selectedEl = elements.find(el => el.id === selectedId) || null;
 
+      const canvasSize = React.useMemo(() => {
+        const PADDING = 40;
+        let w = 300, h = 200;
+        elements.forEach(el => {
+          if (el.type === 'text') {
+            const tw = el.content.length * el.fontSize * 0.55;
+            const th = el.fontSize * 1.4;
+            w = Math.max(w, el.x + tw + PADDING);
+            h = Math.max(h, el.y + th + PADDING);
+          } else {
+            const ratio = el.naturalWidth ? el.naturalHeight / el.naturalWidth : 0.75;
+            w = Math.max(w, el.x + el.width + PADDING);
+            h = Math.max(h, el.y + el.width * ratio + PADDING);
+          }
+        });
+        return { width: Math.round(w), height: Math.round(h) };
+      }, [elements]);
+
       return (
         <React.Fragment>
           <header className="editor-topbar">
@@ -473,6 +570,8 @@ function addServerImageToCanvas(imageUrl) {
               placeholder="Project title..."/>
             <div className="topbar-actions">
               <button className="btn-secondary" onClick={saveProject}>Save</button>
+              <button className="btn-secondary" onClick={downloadAsImage}>Download Image</button>
+              <button className="btn-secondary" onClick={downloadAsPdf}>Download PDF</button>
               <a href="help.html" className="btn-secondary">Help</a>
             </div>
           </header>
@@ -493,14 +592,15 @@ function addServerImageToCanvas(imageUrl) {
               />
 
             <main className="canvas-area" onClick={handleCanvasClick}>
-              <p className="canvas-label">Live Preview — 600 × 400</p>
+              <p className="canvas-label">Live Preview — {canvasSize.width} × {canvasSize.height}</p>
               <DesignCanvas
                 elements={elements}
                 selectedId={selectedId}
                 bgColor={bgColor}
                 bgImage={bgImage}
                 dragging={dragging}
-                onMouseDown={handleMouseDown}/>
+                onMouseDown={handleMouseDown}
+                canvasSize={canvasSize}/>
             </main>
 
             <RightPanel
