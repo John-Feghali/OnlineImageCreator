@@ -482,7 +482,10 @@ async function saveProject() {
   return;
 }
 
-  const canvasPreview = await html2canvas(designCanvas);
+  const canvasPreview = await html2canvas(designCanvas, {
+  useCORS: true
+});
+  
   const previewImage = canvasPreview.toDataURL("image/png");
   
   const project = {
