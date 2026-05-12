@@ -483,6 +483,16 @@ function saveProject() {
     savedAt: new Date().toLocaleString()
   };
 
+  const savedProjects =
+    JSON.parse(localStorage.getItem("studioKitProjects")) || [];
+
+   savedProjects.push(project);
+
+  localStorage.setItem("studioKitProjects", JSON.stringify(savedProjects));
+
+  alert("Project saved successfully!");
+}
+
 function loadLastProject() {
   const savedProjects =
     JSON.parse(localStorage.getItem("studioKitProjects")) || [];
@@ -501,16 +511,6 @@ function loadLastProject() {
   setSelectedId(null);
 
   alert("Project loaded successfully!");
-}
-
-  const savedProjects =
-    JSON.parse(localStorage.getItem("studioKitProjects")) || [];
-
-  savedProjects.push(project);
-
-  localStorage.setItem("studioKitProjects", JSON.stringify(savedProjects));
-
-  alert("Project saved successfully!");
 }
 
       function updateElement(id, prop, value) {
