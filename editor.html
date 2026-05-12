@@ -14,6 +14,7 @@
 <body class="editor-body">
 
   <div id="root"></div>
+
   
   <script src="images.js"></script>
   
@@ -473,9 +474,16 @@ function addServerImageToCanvas(imageUrl) {
         }
       }
 
-function saveProject() {
+async function saveProject() {
+  const designCanvas = document.querySelector(".design-canvas");
   
-  const previewImage = canvas.toDataURL("image/png");
+  if (!designCanvas) {
+  alert("Could not find the design canvas.");
+  return;
+}
+
+  const canvasPreview = await html2canvas(designCanvas);
+  const previewImage = canvasPreview.toDataURL("image/png");
   
   const project = {
     id: Date.now(),
