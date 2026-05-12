@@ -519,3 +519,22 @@ a {
   border-radius: 6px;
   display: block;
 }
+
+.help-steps li {
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.faq-item {
+    padding: 10px 0;
+    border-bottom: 1px solid lightgray;
+}
+
+.faq-item:last-child {
+    border-bottom: none;
+}
+
+.faq-item p {
+    color: dimgray;
+    margin-top: 4px;
+}
