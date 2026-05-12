@@ -32,16 +32,17 @@
     </section>
 
     <!-- SAVED PROJECTS SECTION -->
-    <section class="projects-section">
-      <h2>Saved Projects</h2>
-      <p class="section-note">Projects section — displays user's previously saved designs</p>
+<section class="projects-section">
+  <h2>Saved Projects</h2>
+  <p class="section-note">Projects section — displays user's previously saved designs</p>
 
-      <div class="projects-grid">
-        <!-- New Project Card -->
-        <a href="editor.html" class="project-card new-project">
-          <span class="plus-icon">+</span>
-          <p>New Project</p>
-        </a>
+  <div class="projects-grid" id="projectsGrid">
+    <a href="editor.html" class="project-card new-project">
+      <span class="plus-icon">+</span>
+      <p>New Project</p>
+    </a>
+  </div>
+</section>
 
         <!-- Placeholder saved project cards -->
         <div class="project-card saved-project">
@@ -74,5 +75,57 @@
       <a href="help.html">Help/README</a>
     </nav>
   </footer>
+
+  <script>
+  const projectsGrid = document.getElementById("projectsGrid");
+
+  function loadSavedProjectsOnHome() {
+    const savedProjects =
+      JSON.parse(localStorage.getItem("studioKitProjects")) || [];
+
+    savedProjects.forEach((project, index) => {
+      const card = document.createElement("div");
+      card.className = "project-card saved-project";
+
+      card.innerHTML = `
+        <div class="project-thumbnail">
+          ${project.elements && project.elements.length > 0
+            ? "Saved Design"
+            : "Empty Project"}
+        </div>
+
+        <p class="project-name">${project.title || "Untitled Project"}</p>
+        <p class="project-description">Saved: ${project.savedAt || "Recently"}</p>
+
+        <div class="project-actions">
+          <a href="editor.html" class="btn-small">Open</a>
+          <button class="btn-small btn-danger" onclick="deleteProject(${index})">Delete</button>
+        </div>
+      `;
+
+      projectsGrid.appendChild(card);
+    });
+  }
+
+  function deleteProject(index) {
+    const savedProjects =
+      JSON.parse(localStorage.getItem("studioKitProjects")) || [];
+
+    projectsGrid.innerHTML = `
+  <a href="editor.html" class="project-card new-project">
+    <span class="plus-icon">+</span>
+    <p>New Project</p>
+  </a>
+`;
+
+    savedProjects.splice(index, 1);
+
+    localStorage.setItem("studioKitProjects", JSON.stringify(savedProjects));
+
+    location.reload();
+  }
+
+  loadSavedProjectsOnHome();
+</script>
 </body>
 </html>
