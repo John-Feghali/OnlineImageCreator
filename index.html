@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudioKit - Home</title>
+  <title>SimpleStudioKit - Home</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <!-- NAV BAR -->
   <header class="navbar">
-    <div class="nav-logo">StudioKit</div>
+    <div class="nav-logo">SimpleStudioKit</div>
     <nav class="nav-links">
       <a href="index.html">Home</a>
       <a href="editor.html">Editor</a>
@@ -68,13 +68,13 @@ function loadSavedProjectsOnHome() {
     card.className = "project-card saved-project";
 
     card.innerHTML = `
-      <div class="project-thumbnail">
-        ${
-          project.elements && project.elements.length > 0
-            ? "Saved Design"
-            : "Empty Project"
-        }
-      </div>
+    <div class="project-thumbnail">
+  ${
+    project.preview
+      ? `<img src="${project.preview}" class="saved-preview" alt="Saved project preview">`
+      : "No preview available"
+  }
+</div>
 
       <p class="project-name">${project.title || "Untitled Project"}</p>
       <p class="project-description">Saved: ${project.savedAt || "Recently"}</p>
