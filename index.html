@@ -77,55 +77,50 @@
   </footer>
 
   <script>
-  const projectsGrid = document.getElementById("projectsGrid");
+ const projectsGrid = document.getElementById("projectsGrid");
 
-  function loadSavedProjectsOnHome() {
-    const savedProjects =
-      JSON.parse(localStorage.getItem("studioKitProjects")) || [];
+function loadSavedProjectsOnHome() {
+  const savedProjects =
+    JSON.parse(localStorage.getItem("studioKitProjects")) || [];
 
-    savedProjects.forEach((project, index) => {
-      const card = document.createElement("div");
-      card.className = "project-card saved-project";
+  savedProjects.forEach((project, index) => {
+    const card = document.createElement("div");
+    card.className = "project-card saved-project";
 
-      card.innerHTML = `
-        <div class="project-thumbnail">
-          ${project.elements && project.elements.length > 0
+    card.innerHTML = `
+      <div class="project-thumbnail">
+        ${
+          project.elements && project.elements.length > 0
             ? "Saved Design"
-            : "Empty Project"}
-        </div>
+            : "Empty Project"
+        }
+      </div>
 
-        <p class="project-name">${project.title || "Untitled Project"}</p>
-        <p class="project-description">Saved: ${project.savedAt || "Recently"}</p>
+      <p class="project-name">${project.title || "Untitled Project"}</p>
+      <p class="project-description">Saved: ${project.savedAt || "Recently"}</p>
 
-        <div class="project-actions">
-          <a href="editor.html" class="btn-small">Open</a>
-          <button class="btn-small btn-danger" onclick="deleteProject(${index})">Delete</button>
-        </div>
-      `;
+      <div class="project-actions">
+        <a href="editor.html" class="btn-small">Open</a>
+        <button class="btn-small btn-danger" onclick="deleteProject(${index})">Delete</button>
+      </div>
+    `;
 
-      projectsGrid.appendChild(card);
-    });
-  }
+    projectsGrid.appendChild(card);
+  });
+}
 
-  function deleteProject(index) {
-    const savedProjects =
-      JSON.parse(localStorage.getItem("studioKitProjects")) || [];
+function deleteProject(index) {
+  const savedProjects =
+    JSON.parse(localStorage.getItem("studioKitProjects")) || [];
 
-    projectsGrid.innerHTML = `
-  <a href="editor.html" class="project-card new-project">
-    <span class="plus-icon">+</span>
-    <p>New Project</p>
-  </a>
-`;
+  savedProjects.splice(index, 1);
 
-    savedProjects.splice(index, 1);
+  localStorage.setItem("studioKitProjects", JSON.stringify(savedProjects));
 
-    localStorage.setItem("studioKitProjects", JSON.stringify(savedProjects));
+  location.reload();
+}
 
-    location.reload();
-  }
-
-  loadSavedProjectsOnHome();
+loadSavedProjectsOnHome();
 </script>
 </body>
 </html>
