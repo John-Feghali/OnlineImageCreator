@@ -474,12 +474,16 @@ function addServerImageToCanvas(imageUrl) {
       }
 
 function saveProject() {
+  
+  const previewImage = canvas.toDataURL("image/png");
+  
   const project = {
     id: Date.now(),
     title: projectTitle || "Untitled Project",
     elements: elements,
     bgColor: bgColor,
     bgImage: bgImage,
+    preview: previewImage,
     savedAt: new Date().toLocaleString()
   };
 
