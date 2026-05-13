@@ -80,7 +80,7 @@ function loadSavedProjectsOnHome() {
       <p class="project-description">Saved: ${project.savedAt || "Recently"}</p>
 
       <div class="project-actions">
-        <a href="editor.html" class="btn-small">Open</a>
+        <a href="editor.html?project=${encodeURIComponent(project.id)}" class="btn-small">Open</a>
         <button class="btn-small btn-danger" onclick="deleteProject(${index})">Delete</button>
       </div>
     `;

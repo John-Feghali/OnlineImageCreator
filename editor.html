@@ -333,6 +333,23 @@
       const [imageSearch, setImageSearch] = useState("nature");
       const [serverImages, setServerImages] = useState([]);
       const [imageStatus, setImageStatus] = useState("");
+
+      useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const requestedId = params.get("project");
+        if (!requestedId) return;
+        const savedProjects =
+          JSON.parse(localStorage.getItem("studioKitProjects")) || [];
+        const match = savedProjects.find(
+          p => String(p.id) === String(requestedId)
+        );
+        if (!match) return;
+        setProjectTitle(match.title || "Untitled Project");
+        setElements(match.elements || []);
+        setBgColor(match.bgColor || "#ffffff");
+        setBgImage(match.bgImage || "");
+        setSelectedId(null);
+      }, []);
       
 
       function addText() {
